@@ -22,44 +22,73 @@ class UserData:
                 self.userdata.append([i[0].strip(), i[1].strip()])
 class Result:
     def __init__(self, configobj, userobj):
-        rate = configobj.get_config('JiShuL')+configobj.get_config('JiShuH')+configobj.get_config('YangLao')+configobj.get_config('YiLiao')+configobj.get_config('ShiYe')+configobj.get_config('GongShang')+configobj.get_config('ShengYu')+configobj.get_config('GongJiJin')
-        def calu(sal,rately):
-            if sal <= 2193:
-                shebao = 2193 * rately
-            elif sal <= 16446:
-                shebao = sal * rately
-            else:
-                shebao = 16446 * rately
-            print(shebao)
-            re_sal = sal - shebao - 3500
-            if r_sal <= 0:
-                geshui = 0
-            elif r_sal <= 1500:
-                geshui = r_sal * 0.03
-            elif r_sal <= 4500:
-                geshui = r_sal * 0.1 + 105
-            elif r_sal <= 9000:
-                geshui = r_sal * 0.2 + 555
-            elif r_sal <= 35000:
-                geshui = r_sal * 0.25 + 1005
-            elif r_sal <= 55000:
-                geshui = r_sal * 0.3 + 2775
-            elif r_sal <= 80000:
-                geshui = r_sal * 0.35 + 5505
-            else:
-                geshui = r_sal * 0.45 + 13505
-            on_sal = sal - shebao - geshui
-            return [shebao, geshui, on_sal]
+        self.userobj = userobj
+        self.rate = float(configobj.get_config('YangLao'))+float(configobj.get_config('YiLiao'))+float(configobj.get_config('ShiYe'))+float(configobj.get_config('GongShang'))+float(configobj.get_config('ShengYu'))+float(configobj.get_config('GongJiJin'))
+        #print("rate:{}".format(self.rate))
+    def calu(self,sal,rately):
 
-        for user in userobj:
-            user.extend(calu(int(user[1]),rate))
-            print(user)
-                
+        if sal <= 2193:
+            shebao = 2193 * rately
+        elif sal <= 16446:
+            shebao = sal * rately
+        else:
+            shebao = 16446 * rately
+        #print(shebao)
+        r_sal = sal - shebao - 3500
+        if r_sal <= 0:
+            geshui = 0
+        elif r_sal <= 1500:
+            geshui = r_sal * 0.03
+        elif r_sal <= 4500:
+            geshui = r_sal * 0.1 - 105
+        elif r_sal <= 9000:
+            geshui = r_sal * 0.2 - 555
+        elif r_sal <= 35000:
+            geshui = r_sal * 0.25 - 1005
+        elif r_sal <= 55000:
+            geshui = r_sal * 0.3 - 2775
+        elif r_sal <= 80000:
+            geshui = r_sal * 0.35 - 5505
+        else:
+            geshui = r_sal * 0.45 - 13505
+        on_sal = sal - shebao - geshui
+        return ['{:.2f}'.format(shebao), '{:.2f}'.format(geshui), '{:.2f}'.format(on_sal)]
 
+    def result(self):
+        res = []
+        for i in self.userobj:
+            i.extend(self.calu(float(i[1]),self.rate))
+            res.append(tuple(i))
+        return res
 
+    def outfile(self,outfile):
+        data = self.result()
+        print(data)
+        with open(outfile,'w') as f:
+            csv.writer(f).writerows(data)
+
+class Args:
+    def __init__(self):
+        self.args = sys.argv[1:]
+
+    def get_filename(self):
+        if len(self.args) == 6:
+            cindex = self.args.index('-c')
+            configfilename = self.args[cindex+1]
+            dindex = self.args.index('-d')
+            userfilename = self.args[dindex+1]
+            oindex = self.args.index('-o')
+            outfilename = self.args[oindex+1]
+            return [configfilename, userfilename, outfilename]
+        else:
+            print("Parameter Error")
 
 if __name__ == '__main__':
-    config = Config('/home/shiyanlou/test.cfg')
-   # print(config.get_config('JiShuL'))
-    user = UserData('/home/shiyanlou/user.csv')
-    Result(config, user.userdata)
+    args = Args()
+    filename = args.get_filename()
+    print(filename)
+    config = Config(filename[0])
+    #print(config.get_config('JiShuL'))
+    user = UserData(filename[1])
+    #print(user.userdata)
+    Result(config, user.userdata).outfile(filename[2])
