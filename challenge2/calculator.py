@@ -2,6 +2,10 @@
 
 import sys
 import csv
+from multiprocessing import Process, Queue
+
+#数据通讯
+queue = Queue()
 
 class Config:
     def __init__(self, configfile):
@@ -63,7 +67,7 @@ class Result:
 
     def outfile(self,outfile):
         data = self.result()
-        print(data)
+        #print(data)
         with open(outfile,'w') as f:
             csv.writer(f).writerows(data)
 
@@ -83,12 +87,26 @@ class Args:
         else:
             print("Parameter Error")
 
+def q1(userfile):
+    user = UserData(userfile)
+    queue.put(user)
+def q2(configfile):
+    userdata = queue.get()
+    config = Config(configfile)
+    newdata = Result(config,user.userdata).result()
+    queue.put(newdata)
+
+def q3(outfile):
+    newdata1 = queue.get()
+    with open(outfile,'w') as f:
+            csv.writer(f).writerows(newdata1)
+
+def main(file1,file2,file3):
+    Process(target=q1,args=(file1,)).start()
+    Process(target=q2,args=(file2,)).start()
+    Process(target=q3,args=(file3,)).start()
+
 if __name__ == '__main__':
     args = Args()
-    filename = args.get_filename()
-    print(filename)
-    config = Config(filename[0])
-    #print(config.get_config('JiShuL'))
-    user = UserData(filename[1])
-    #print(user.userdata)
-    Result(config, user.userdata).outfile(filename[2])
+    files = args.get_filename()
+    main(files[0],files[1],files[2])
