@@ -93,42 +93,42 @@ def q1(userfile):
     print('user_in:')
     print(user)
 def q2(configfile):
-	try:
-		userdata = queue.get([False, 3])
-	except Queue.Empty:
-		break
-	print('user_out:')
-	print(userdata)
-	config = Config(configfile)
-	newdata = Result(config,userdata).result()
-	queue.put(newdata)
-	print('newdata_in:')
-	print(newdata)
+    try:
+        userdata = queue.get([False, 3])
+    except Queue.Empty:
+        break
+    print('user_out:')
+    print(userdata)
+    config = Config(configfile)
+    newdata = Result(config,userdata).result()
+    queue.put(newdata)
+    print('newdata_in:')
+    print(newdata)
 def q3(outfile):
-	try:
-		newdata1 = Queue.get([False, 3])
-	except Queue.Empty:
-		break
-	print('newdata_in:')
-	print(newdata1)
-	with open(outfile,'w') as f:
-		csv.writer(f).writerows(newdata1)
+    try:
+        newdata1 = Queue.get([False, 3])
+    except Queue.Empty:
+        break
+    print('newdata_in:')
+    print(newdata1)
+    with open(outfile,'w') as f:
+        csv.writer(f).writerows(newdata1)
 
 def main(file1,file2,file3):
-	p1 = Process(target=q1,args=(file1,))
-	p2 = Process(target=q2,args=(file2,))
-	p3 = Process(target=q3,args=(file3,))
+    p1 = Process(target=q1,args=(file1,))
+    p2 = Process(target=q2,args=(file2,))
+    p3 = Process(target=q3,args=(file3,))
 
-	p1.start()
-	p2.start()
-	p3.start()
+    p1.start()
+    p2.start()
+    p3.start()
 
-	p1.join()
-	p2.join()
-	p3.join()
+    p1.join()
+    p2.join()
+    p3.join()
 
 if __name__ == '__main__':
-	args = Args()
-	files = args.get_filename()
-	#print(files)
-	main(files[1],files[0],files[2])
+    args = Args()
+    files = args.get_filename()
+    #print(files)
+    main(files[1],files[0],files[2])
