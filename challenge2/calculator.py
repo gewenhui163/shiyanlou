@@ -90,23 +90,39 @@ class Args:
 def q1(userfile):
     user = UserData(userfile)
     queue.put(user)
+    print('user_in:')
+    print(user)
 def q2(configfile):
-    userdata = queue.get()
+    userdata = queue.get([False,3])
+    print('user_out:')
+    print(userdata)
     config = Config(configfile)
-    newdata = Result(config,user.userdata).result()
+    newdata = Result(config,userdata).result()
     queue.put(newdata)
-
+    print('newdata_in:')
+    print(newdata)
 def q3(outfile):
-    newdata1 = queue.get()
+    newdata1 = queue.get([False,3])
+    print('newdata_in:')
+    print(newdata)
     with open(outfile,'w') as f:
             csv.writer(f).writerows(newdata1)
 
 def main(file1,file2,file3):
-    Process(target=q1,args=(file1,)).start()
-    Process(target=q2,args=(file2,)).start()
-    Process(target=q3,args=(file3,)).start()
+    p1 = Process(target=q1,args=(file1,))
+    p2 = Process(target=q2,args=(file2,))
+    p3 = Process(target=q3,args=(file3,))
+
+    p1.start()
+    p2.start()
+    p3.start()
+
+    p1.join()
+    p2.join()
+    p3.join()
 
 if __name__ == '__main__':
     args = Args()
     files = args.get_filename()
-    main(files[0],files[1],files[2])
+    #print(files)
+    main(files[1],files[0],files[2])
