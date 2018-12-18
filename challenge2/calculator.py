@@ -88,7 +88,7 @@ class Args:
             print("Parameter Error")
 
 def q1(userfile):
-    user = UserData(userfile)
+    user = UserData(userfile).userdata
     queue.put(user)
     print('user_in:')
     print(user)
@@ -104,7 +104,7 @@ def q2(configfile):
 def q3(outfile):
     newdata1 = queue.get([False,3])
     print('newdata_in:')
-    print(newdata)
+    print(newdata1)
     with open(outfile,'w') as f:
             csv.writer(f).writerows(newdata1)
 
