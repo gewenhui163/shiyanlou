@@ -2,10 +2,11 @@
 
 import sys
 import csv
+import queue
 from multiprocessing import Process, Queue
 
 #数据通讯
-queue = Queue()
+qu1 = Queue()
 
 class Config:
     def __init__(self, configfile):
@@ -89,29 +90,29 @@ class Args:
 
 def q1(userfile):
     user = UserData(userfile).userdata
-    queue.put(user)
+    qu1.put(user)
     print('user_in:')
     print(user)
 def q2(configfile):
     while True:
         try:
-            userdata = queue.get(False)
+            userdata = qu1.get(False)
             print(1)
-        except Queue.Empty:
+        except queue.Empty:
             print(2)
             break
     print('user_out:')
     print(userdata)
     config = Config(configfile)
     newdata = Result(config,userdata).result()
-    queue.put(newdata)
+    qu1.put(newdata)
     print('newdata_in:')
     print(newdata)
 def q3(outfile):
     while True:
         try:
-            newdata1 = queue.get(False)
-        except Queue.Empty:
+            newdata1 = qu1.get(False)
+        except queue.Empty:
             break
     print('newdata_in:')
     print(newdata1)
@@ -124,11 +125,10 @@ def main(file1,file2,file3):
     p3 = Process(target=q3,args=(file3,))
 
     p1.start()
-    p2.start()
-    p3.start()
-
     p1.join()
+    p2.start()
     p2.join()
+    p3.start()
     p3.join()
 
 if __name__ == '__main__':
