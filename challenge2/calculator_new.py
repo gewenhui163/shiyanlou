@@ -93,10 +93,13 @@ def q1(userfile):
     print('user_in:')
     print(user)
 def q2(configfile):
-    try:
-        userdata = queue.get([False, 3])
-    except Queue.Empty:
-        break
+    while True:
+        try:
+            userdata = queue.get(False)
+            print(1)
+        except Queue.Empty:
+            print(2)
+            break
     print('user_out:')
     print(userdata)
     config = Config(configfile)
@@ -105,10 +108,11 @@ def q2(configfile):
     print('newdata_in:')
     print(newdata)
 def q3(outfile):
-    try:
-        newdata1 = Queue.get([False, 3])
-    except Queue.Empty:
-        break
+    while True:
+        try:
+            newdata1 = queue.get(False)
+        except Queue.Empty:
+            break
     print('newdata_in:')
     print(newdata1)
     with open(outfile,'w') as f:
