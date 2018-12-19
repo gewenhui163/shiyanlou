@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-import sys
+import getopt, sys
 import csv
 import queue
 from multiprocessing import Process, Queue
+from configparser import ConfigParser
+from datetime import datetime
 
 #数据通讯
 qu1 = Queue()
@@ -28,8 +30,14 @@ class UserData:
 class Result:
     def __init__(self, configobj, userobj):
         self.userobj = userobj
-        self.rate = float(configobj.get_config('YangLao'))+float(configobj.get_config('YiLiao'))+float(configobj.get_config('ShiYe'))+float(configobj.get_config('GongShang'))+float(configobj.get_config('ShengYu'))+float(configobj.get_config('GongJiJin'))
+        self.rate = 0
+        #self.rate = float(configobj.get_config('YangLao'))+float(configobj.get_config('YiLiao'))+float(configobj.get_config('ShiYe'))+float(configobj.get_config('GongShang'))+float(configobj.get_config('ShengYu'))+float(configobj.get_config('GongJiJin'))
         #print("rate:{}".format(self.rate))
+        for i in configobj:
+            if 'jishul' in i or 'jishuh' in i:
+                continue
+            self.rate += float(i[1])
+        print("rate:{}".format(self.rate))
     def calu(self,sal,rately):
 
         if sal <= 2193:
@@ -57,7 +65,9 @@ class Result:
         else:
             geshui = r_sal * 0.45 - 13505
         on_sal = sal - shebao - geshui
-        return ['{:.2f}'.format(shebao), '{:.2f}'.format(geshui), '{:.2f}'.format(on_sal)]
+        saltime = datetime.now()
+        saltimestr = saltime.strftime('%Y-%m-%d %H:%M:%S')
+        return ['{:.2f}'.format(shebao), '{:.2f}'.format(geshui), '{:.2f}'.format(on_sal), saltimestr]
 
     def result(self):
         res = []
@@ -74,37 +84,48 @@ class Result:
 
 class Args:
     def __init__(self):
-        self.args = sys.argv[1:]
+        #self.args = sys.argv[1:]
+        self.opts, self.args = getopt.getopt(sys.argv[1:], "hC:c:d:o:", ["help"])
+        print(self.opts)
 
     def get_filename(self):
-        if len(self.args) == 6:
-            cindex = self.args.index('-c')
-            configfilename = self.args[cindex+1]
-            dindex = self.args.index('-d')
-            userfilename = self.args[dindex+1]
-            oindex = self.args.index('-o')
-            outfilename = self.args[oindex+1]
-            return [configfilename, userfilename, outfilename]
+        hflag = 0
+        if len(self.opts) == 3 or len(self.opts) == 4 or len(self.opts) == 5:
+            cityname = 'DEFAULT'
+            for optparam in self.opts:
+                if '-C' in optparam:
+                    cityname = optparam[1].upper()
+                if '-c' in optparam:
+                    configfilename = optparam[1]
+                if '-d' in optparam:
+                    userfilename = optparam[1]
+                if '-o' in optparam:
+                    outfilename = optparam[1]
+                if ('-h' in optparam or '--help' in optparam):
+                    hflag = 'exist'
+            return [cityname,configfilename, userfilename, outfilename, hflag]
         else:
             print("Parameter Error")
 
 def q1(userfile):
     user = UserData(userfile).userdata
     qu1.put(user)
-    print('user_in:')
-    print(user)
-def q2(configfile):
+    #print('user_in:')
+    #print(user)
+def q2(configfile, cityname='DEFAULT'):
     while True:
         try:
             userdata = qu1.get(False)
-            print(1)
         except queue.Empty:
-            print(2)
             break
     print('user_out:')
-    print(userdata)
-    config = Config(configfile)
-    newdata = Result(config,userdata).result()
+    config_user = ConfigParser()
+    config_user.read(configfile,encoding='UTF-8')
+    print(config_user.sections())
+    configdata = config_user.items(cityname)
+    print(cityname)
+    print(configdata)
+    newdata = Result(configdata,userdata).result()
     qu1.put(newdata)
     print('newdata_in:')
     print(newdata)
@@ -119,10 +140,10 @@ def q3(outfile):
     with open(outfile,'w') as f:
         csv.writer(f).writerows(newdata1)
 
-def main(file1,file2,file3):
+def main(file1,file2,file3,file4):
     p1 = Process(target=q1,args=(file1,))
-    p2 = Process(target=q2,args=(file2,))
-    p3 = Process(target=q3,args=(file3,))
+    p2 = Process(target=q2,args=(file2,file3))
+    p3 = Process(target=q3,args=(file4,))
 
     p1.start()
     p1.join()
@@ -134,5 +155,6 @@ def main(file1,file2,file3):
 if __name__ == '__main__':
     args = Args()
     files = args.get_filename()
-    #print(files)
-    main(files[1],files[0],files[2])
+    print('-----')
+    print(files)
+    main(files[2],files[1],files[0],files[3])
