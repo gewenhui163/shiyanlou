@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block header %}
+	<p>Title List</p>
+{% endblock %}
+
+{% block content %}
+	{% for file in datalist %}
+            {{ file }}
+            {{ loop.index }}
+            <p><a href={{ url_for('fileshow', filename=file.title) }}>{{ datalist[loop.index-1].title }}</a><p>
+                 
+	{% endfor %}
+{% endblock %}
