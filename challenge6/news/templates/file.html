@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block header %}
-	<h2>{{ data.title }}&nbsp;&nbsp;&nbsp;<h3>{{ data.created_time }}</h3></h2>
+	<h2>{{ data }}</h3></h2>
 {% endblock %}
 {% block content %}
-	<p>{{ data.content }}</p>
+	{% for in data %}
+            <p>{{ data }}</p>
+	{% endfor %}
 {% endblock %}

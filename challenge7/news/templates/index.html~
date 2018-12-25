@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block header %}
+	<p>Title List</p>
+{% endblock %}
+
+{% block content %}
+	{% for i in datalist %}
+		<p><a href={{ url_for('fileshow', filename=i.name.split('.')[0]) }}>{{ i.title }}</a><p>
+	{% endfor %}
+{% endblock %}
