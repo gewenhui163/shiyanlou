@@ -71,11 +71,11 @@ def index():
         #print(filelist[0].id)
         #tagslist = collection.find()
         newfilelist = []
-        newfile = {}
         for file in filelist:
             print(file.id)
             filetags = collection.find({'fileid': file.id})
             filetag = []
+            newfile = {}
             for tag in filetags:
                 filetag.append(tag['tag'])
                 #print(tag['tag'])
@@ -94,9 +94,9 @@ def index():
 def not_found(error):
 	return render_template('404.html'), 404
 
-@app.route('/files/<filename>')
-def fileshow(filename):
-        data = db.session.query(File).filter_by(title=filename).all()
+@app.route('/files/<fileid>')
+def fileshow(fileid):
+        data = db.session.query(File).filter_by(id=fileid).all()
         print('data:',data)
         if data:
                 return render_template('file.html', data=data)
