@@ -48,7 +48,7 @@ def split():
         #
         # print()
         print(wb_tmp)
-        #wb_tmp.save('{}.xlsx').format(yer)
+        wb_tmp.save('{}.xlsx'.format(yer))
 
 if __name__ == '__main__':
     combine()
